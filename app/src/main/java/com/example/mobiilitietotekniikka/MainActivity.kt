@@ -28,19 +28,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import android.os.Handler
 import android.os.Looper
-import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.foundation.layout.Row
+import android.view.MenuItem
+
 
 
 private var isImageClicked = mutableStateOf(false)
 private var c_window = mutableStateOf(0)
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             MobiilitietotekniikkaTheme {
                 when (c_window.value){
@@ -71,15 +77,12 @@ class MainActivity : ComponentActivity() {
                         Column(modifier = Modifier.height(400.dp).verticalScroll(rememberScrollState())) {
                             Text("Juuh")
                             Spacer(modifier = Modifier.height(100.dp))
-                            if (isImageClicked.value) {
-                                c_window.value = 0;
-                                isImageClicked.value = false
-                            }
-                            Image(painter = painterResource(id = R.drawable.janna), contentDescription =
-                            "My Image", modifier = Modifier.clickable{
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Spacer(modifier = Modifier.weight(1f))
+                                Image(painter = painterResource(id = R.drawable.back_button), contentDescription =
+                                "My Image", modifier = Modifier.clickable{
                                 isImageClicked.value = !isImageClicked.value
-                            }
-                            )
+                            }.size(50.dp))
                         }
                     }
                 }
@@ -88,3 +91,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 }
+    override fun onBackPressed() {
+        if (c_window.value == 2) {
+            c_window.value = 0
+        } else {
+            super.onBackPressed()
+        }}
+}
+
+
