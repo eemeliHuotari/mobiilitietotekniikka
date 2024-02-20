@@ -35,7 +35,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.asFloatState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,6 +48,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import coil.compose.AsyncImage
+import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 
 private var c_window = mutableIntStateOf(0)
@@ -52,7 +57,7 @@ private var messages = mutableListOf<String>("moi","hello","hej")
 private var profilePicture = R.drawable.janna
 private var uri1: Uri? = null
 private var message: String = ""
-
+private var temperature1 = mutableFloatStateOf(0.0f)
 
 
 
@@ -75,16 +80,19 @@ class MainActivity : ComponentActivity() {
 
             override fun onSensorChanged(event: SensorEvent) {
                 val temperature = event.values[0]
-                if (temperature < 1) {
-
-                    Notification.createNotification(
-                        this@MainActivity,
-                        "Kylmä",
-                        "On alle 1°C"
-                    )
+                    if (temperature1.floatValue != temperature) {
+                            temperature1.floatValue = temperature
+                        }
+                    if (temperature < 1) {
+                        Notification.createNotification(
+                            this@MainActivity,
+                            "Kylmä",
+                            "On alle 1°C"
+                        )
+                    }
                 }
             }
-        }
+
         sensorManager.registerListener(sensorEventListener, temperatureSensor, SensorManager.SENSOR_DELAY_NORMAL)
         setContent {
             MobiilitietotekniikkaTheme {
@@ -101,7 +109,18 @@ class MainActivity : ComponentActivity() {
                                     .verticalScroll(rememberScrollState())
                             ) {
                                 Spacer(modifier = Modifier.height(100.dp))
+                                Row (
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ){
 
+                                    Text(
+                                        text = "${temperature1.floatValue} °C",
+                                        style = MaterialTheme.typography.displaySmall
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(100.dp))
                                 for (message in messages) {
                                     Row(
                                         modifier = Modifier
@@ -180,11 +199,11 @@ class MainActivity : ComponentActivity() {
                                     .clickable {
                                         messages.add(message)
 
-                                            Notification.createNotification(
-                                                this@MainActivity,
-                                                "Uusi viesti",
-                                                "Uusi viesti vastaanotettu: $message"
-                                            )
+                                        Notification.createNotification(
+                                            this@MainActivity,
+                                            "Uusi viesti",
+                                            "Uusi viesti vastaanotettu: $message"
+                                        )
                                     }
                                     .size(50.dp))
                             }
@@ -235,10 +254,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-
-
-
     override fun onBackPressed() {
         if (c_window.intValue != 0) {
             c_window.intValue = 0
