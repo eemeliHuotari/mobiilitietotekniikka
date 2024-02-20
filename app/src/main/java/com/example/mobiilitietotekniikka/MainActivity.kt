@@ -1,4 +1,10 @@
 package com.example.mobiilitietotekniikka
+import android.content.Context
+import android.content.Context.SENSOR_SERVICE
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,6 +34,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +42,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.graphics.Color
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import coil.compose.AsyncImage
 
 
@@ -43,6 +52,9 @@ private var messages = mutableListOf<String>("moi","hello","hej")
 private var profilePicture = R.drawable.janna
 private var uri1: Uri? = null
 private var message: String = ""
+
+
+
 
 class MainActivity : ComponentActivity() {
     private val getContent =
@@ -54,6 +66,26 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val temperatureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
+
+        val sensorEventListener = object : SensorEventListener {
+            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+            }
+
+            override fun onSensorChanged(event: SensorEvent) {
+                val temperature = event.values[0]
+                if (temperature < 1) {
+
+                    Notification.createNotification(
+                        this@MainActivity,
+                        "Kylmä",
+                        "On alle 1°C"
+                    )
+                }
+            }
+        }
+        sensorManager.registerListener(sensorEventListener, temperatureSensor, SensorManager.SENSOR_DELAY_NORMAL)
         setContent {
             MobiilitietotekniikkaTheme {
                 when (c_window.intValue) {
@@ -69,6 +101,7 @@ class MainActivity : ComponentActivity() {
                                     .verticalScroll(rememberScrollState())
                             ) {
                                 Spacer(modifier = Modifier.height(100.dp))
+
                                 for (message in messages) {
                                     Row(
                                         modifier = Modifier
@@ -147,6 +180,11 @@ class MainActivity : ComponentActivity() {
                                     .clickable {
                                         messages.add(message)
 
+                                            Notification.createNotification(
+                                                this@MainActivity,
+                                                "Uusi viesti",
+                                                "Uusi viesti vastaanotettu: $message"
+                                            )
                                     }
                                     .size(50.dp))
                             }
@@ -197,6 +235,9 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+
+
 
     override fun onBackPressed() {
         if (c_window.intValue != 0) {
