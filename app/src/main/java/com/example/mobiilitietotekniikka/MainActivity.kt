@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
 
             override fun onSensorChanged(event: SensorEvent) {
                 val temperature = event.values[0]
-                    if (temperature1.floatValue != temperature) {
+                if (temperature1.floatValue != temperature) {
                             temperature1.floatValue = temperature
                         }
                     if (temperature < 1) {
